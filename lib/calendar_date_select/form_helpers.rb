@@ -54,6 +54,13 @@ module CalendarDateSelect::FormHelpers
   # 
   #   <%= calendar_date_select_tag "name", "2007-01-01", :popup => "force" %>
   # 
+	# === :support_no_js => true                                                                    
+	#                                                                                               
+	# Tells the :popup => 'force' option to use javascript to set the entry field to readonly rather than in the actual html. This way it is still editable for systems that don't support javascript.
+	# Only has an effect when using :popup => 'force'                                               
+	#                                                                                               
+	#   <%= calendar_date_select_tag "name", "2007-01-01", :popup => "force", :support_no_js => true %>
+	#                                                                                               
   # === :time
   # 
   # Show time in the controls.  There's three options:
@@ -154,7 +161,7 @@ module CalendarDateSelect::FormHelpers
       options, javascript_options = CalendarDateSelect.default_options.merge(options), {}
       image = options.delete(:image)
       callbacks = [:before_show, :before_close, :after_show, :after_close, :after_navigate]
-      for key in [:time, :valid_date_check, :embedded, :buttons, :clear_button, :format, :year_range, :month_year, :popup, :hidden, :minute_interval] + callbacks
+      for key in [:time, :valid_date_check, :embedded, :buttons, :clear_button, :format, :year_range, :month_year, :popup, :support_no_js, :hidden, :minute_interval] + callbacks
         javascript_options[key] = options.delete(key) if options.has_key?(key)
       end
 
@@ -165,7 +172,7 @@ module CalendarDateSelect::FormHelpers
       # if we are forcing the popup, automatically set the readonly property on the input control.
       if javascript_options[:popup].to_s == "force"
         javascript_options[:popup] = "'force'"
-        options[:readonly] = true
+        options[:readonly] = true unless javascript_options[:support_no_js]
       end
 
       if (vdc=javascript_options.delete(:valid_date_check))
@@ -203,6 +210,12 @@ module CalendarDateSelect::FormHelpers
             :style => 'border:0px; cursor:pointer;',
 			:class=>'calendar_date_select_popup_icon')
       end
+
+      # disable the input field using javascript if we are supporting no js
+      if javascript_options[:popup].to_s == "'force'" and javascript_options[:support_no_js]
+        out << javascript_tag("$('available_time_entry_date_time').readOnly = true;")
+      end
+
       out
     end
 
