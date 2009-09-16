@@ -198,10 +198,10 @@ module CalendarDateSelect::FormHelpers
 
     def calendar_date_select_output(input, image, options = {}, javascript_options = {})
       out = input
+      uniq_id = "cds_placeholder_#{(rand*100000).to_i}"
+      # we need to be able to locate the target input element, so lets stick an invisible span tag here we can easily locate
+      out << content_tag(:span, nil, :style => "display: none; position: absolute;", :id => uniq_id)
       if javascript_options[:embedded]
-        uniq_id = "cds_placeholder_#{(rand*100000).to_i}"
-        # we need to be able to locate the target input element, so lets stick an invisible span tag here we can easily locate
-        out << content_tag(:span, nil, :style => "display: none; position: absolute;", :id => uniq_id)
         out << javascript_tag("new CalendarDateSelect( $('#{uniq_id}').previous(), #{options_for_javascript(javascript_options)} ); ")
       else
         out << " "
@@ -213,7 +213,7 @@ module CalendarDateSelect::FormHelpers
 
       # disable the input field using javascript if we are supporting no js
       if javascript_options[:popup].to_s == "'force'" and javascript_options[:support_no_js]
-        out << javascript_tag("$('available_time_entry_date_time').readOnly = true;")
+        out << javascript_tag("$('#{uniq_id}').previous().readOnly = true;")
       end
 
       out
